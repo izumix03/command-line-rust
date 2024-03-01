@@ -1,11 +1,30 @@
 use std::error::Error;
+use std::fs::File;
+use std::io;
+use std::io::{BufRead, BufReader};
+
 use clap::{App, Arg};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
 pub fn run(config: Config) -> MyResult<()> {
     for filename in config.files {
-        println!("{}", filename);
+        match open(&filename) {
+            Err(err) => eprintln!("Failed to open {}: {}", filename, err),
+            Ok(file) => {
+                for (line_num, line_result) in file.lines().enumerate() {
+                    let line = line_result?;
+
+                    if config.number_lines {
+                        println!("{:>6}\t{}", line_num + 1, line);
+                    } else if !line.is_empty() && config.number_nonblank_lines {
+                        println!("{:>6}\t{}", line_num + 1, line);
+                    } else {
+                        println!("{}", line);
+                    }
+                }
+            }
+        }
     }
     Ok(())
 }
@@ -53,3 +72,11 @@ pub fn get_args() -> MyResult<Config> {
         number_nonblank_lines: matches.is_present("number_nonblank"),
     })
 }
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
+}
+
