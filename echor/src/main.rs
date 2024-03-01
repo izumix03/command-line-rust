@@ -6,7 +6,7 @@
 
 // {:#?} は整形表示
 
-use clap::{Arg, App};
+use clap::{App, Arg};
 
 fn main() {
     let matches = App::new("echor")
@@ -28,9 +28,7 @@ fn main() {
         )
         .get_matches();
 
-
-    let omit_newline = matches.is_present("omit_newline");
     let text = matches.values_of_lossy("text").unwrap();
-
+    let omit_newline = matches.is_present("omit_newline");
     print!("{}{}", text.join(" "), if omit_newline { "" } else { "\n" });
 }
