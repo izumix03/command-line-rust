@@ -54,8 +54,8 @@ pub fn get_args() -> MyResult<Config> {
     Ok(
         Config {
             files: matchs.values_of_lossy("files").unwrap(),
-            lines: parse_positive_int(&matchs.value_of_lossy("lines").unwrap()).unwrap(),
-            bytes: parse_positive_int(&matchs.value_of_lossy("bytes").unwrap()).ok(),
+            lines: parse_positive_int(&matchs.value_of("lines").unwrap()).unwrap(),
+            bytes: matchs.value_of("bytes").map(parse_positive_int).transpose().map_err(|e| format!("illegal byte count -- {}", e))?
         }
     )
 }
