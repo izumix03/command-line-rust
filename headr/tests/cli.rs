@@ -37,7 +37,9 @@ fn gen_bad_file() -> String {
 
 // --------------------------------------------------
 #[test]
-fn dies_bad_bytes() -> TestResult {
+fn
+
+dies_bad_bytes() -> TestResult {
     let bad = random_string();
     let expected = format!("illegal byte count -- {}", &bad);
     Command::cargo_bin(PRG)?
