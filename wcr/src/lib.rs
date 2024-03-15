@@ -36,6 +36,7 @@ pub fn get_args() -> MyResult<Config> {
         Arg::with_name("chars")
             .long("chars")
             .short("m")
+            .conflicts_with("bytes")
             .help("Show character count"),
         Arg::with_name("lines")
             .long("lines")
