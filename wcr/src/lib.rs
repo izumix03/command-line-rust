@@ -28,25 +28,36 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Input file(s)")
                 .multiple(true)
                 .default_value("-")
-        ).args(&*vec![
-        Arg::with_name("bytes")
-            .long("bytes")
-            .short("c")
-            .help("Show byte count"),
-        Arg::with_name("chars")
-            .long("chars")
-            .short("m")
-            .conflicts_with("bytes")
-            .help("Show character count"),
-        Arg::with_name("lines")
-            .long("lines")
-            .short("l")
-            .help("show line count"),
-        Arg::with_name("words")
-            .long("words")
-            .short("w")
-            .help("Show word count"),
-    ]).get_matches();
+        )
+        .arg(
+            Arg::with_name("bytes")
+                .long("bytes")
+                .short("c")
+                .takes_value(false)
+                .help("Show byte count")
+        )
+        .arg(
+            Arg::with_name("chars")
+                .long("chars")
+                .short("m")
+                .takes_value(false)
+                .conflicts_with("bytes")
+                .help("Show character count")
+        )
+        .arg(
+            Arg::with_name("lines")
+                .long("lines")
+                .takes_value(false)
+                .short("l")
+                .help("show line count")
+        )
+        .arg(
+            Arg::with_name("words")
+                .long("words")
+                .short("w")
+                .takes_value(false)
+                .help("Show word count")
+        ).get_matches();
 
     let lines = matches.is_present("lines");
     let words = matches.is_present("words");
@@ -54,10 +65,10 @@ pub fn get_args() -> MyResult<Config> {
     let chars = matches.is_present("chars");
     Ok(Config {
         files: matches.values_of_lossy("files").unwrap(),
-        lines: if lines {true} else if words || bytes || chars {false} else {true},
-        words: if words {true} else if lines || bytes || chars {false} else {true},
-        bytes: if bytes {true} else if lines || words || chars {false} else {true},
-        chars: if chars {true} else if lines || words || bytes {false} else {false},
+        lines: if lines { true } else if words || bytes || chars { false } else { true },
+        words: if words { true } else if lines || bytes || chars { false } else { true },
+        bytes: if bytes { true } else if lines || words || chars { false } else { true },
+        chars: if chars { true } else if lines || words || bytes { false } else { false },
     })
 }
 
