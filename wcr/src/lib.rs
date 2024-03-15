@@ -51,9 +51,9 @@ pub fn get_args() -> MyResult<Config> {
 
     Ok(Config {
         files: vec![],
-        lines: false,
-        words: false,
-        bytes: false,
+        lines: true,
+        words: true,
+        bytes: true,
         chars: false,
     })
 }
