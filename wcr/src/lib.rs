@@ -46,15 +46,18 @@ pub fn get_args() -> MyResult<Config> {
             .long("words")
             .short("w")
             .help("Show word count"),
-    ])
-        .get_matches();
+    ]).get_matches();
 
+    let lines = matches.is_present("lines");
+    let words = matches.is_present("words");
+    let bytes = matches.is_present("bytes");
+    let chars = matches.is_present("chars");
     Ok(Config {
-        files: vec![],
-        lines: true,
-        words: true,
-        bytes: true,
-        chars: false,
+        files: matches.values_of_lossy("files").unwrap(),
+        lines: if lines {true} else if words || bytes || chars {false} else {true},
+        words: if words {true} else if lines || bytes || chars {false} else {true},
+        bytes: if bytes {true} else if lines || words || chars {false} else {true},
+        chars: if chars {true} else if lines || words || bytes {false} else {false},
     })
 }
 
