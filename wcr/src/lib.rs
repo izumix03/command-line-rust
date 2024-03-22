@@ -13,12 +13,25 @@ pub fn run(config: Config) -> MyResult<()> {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
                 if let Ok(info) = count(file) {
-                    println!("{:?}", info);
+                    println!("{:>8}{:>8}{:>8} {}",
+                             info.num_lines,
+                             info.num_words,
+                             info.num_bytes,
+                             filename,
+                    );
                 }
             }
         }
     }
     Ok(())
+}
+
+fn format_field(value: usize, show: bool) -> String {
+    if show {
+        format!("{:8}", value)
+    } else {
+        "".to_string()
+    }
 }
 
 #[derive(Debug)]
@@ -54,7 +67,7 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
         // line に読み込み、読み込みバイト数が返される
         let line_bytes = file.read_line(&mut line)?;
         if line_bytes == 0 {
-            break
+            break;
         }
         num_bytes += line_bytes;
         num_lines += 1;
@@ -144,7 +157,7 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 mod tests {
     use std::io::Cursor;
 
-    use super::{count, FileInfo};
+    use super::{count, FileInfo, format_field};
 
     #[test]
     fn test_count() {
@@ -158,5 +171,13 @@ mod tests {
             num_chars: 48,
         };
         assert_eq!(info.unwrap(), expected);
+    }
+
+
+    #[test]
+    fn test_format_field() {
+        assert_eq!(format_field(1, false), "");
+        assert_eq!(format_field(3, true), "       3");
+        assert_eq!(format_field(10, true), "      10");
     }
 }
