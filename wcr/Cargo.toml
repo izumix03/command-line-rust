@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = "2.33.4"
+log = "0.4.21"
 
 [dev-dependencies]
 assert_cmd = "2"

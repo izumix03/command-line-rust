@@ -11,10 +11,13 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_) => println!("Opened {}", filename)
+            Ok(file) => {
+                if let Ok(info) = count(file) {
+                    println!("{:?}", info);
+                }
+            }
         }
     }
-    println!("{:#?}", config);
     Ok(())
 }
 
@@ -44,9 +47,9 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_words = 0;
     let mut num_bytes = 0;
     let mut num_chars = 0;
-    
+
     let mut line = String::new();
-    
+
     loop {
         // line に読み込み、読み込みバイト数が返される
         let line_bytes = file.read_line(&mut line)?;
@@ -58,7 +61,7 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
         num_words += line.split_whitespace().count();
         num_chars += line.chars().count();
     }
-    
+
     Ok(FileInfo {
         num_lines,
         num_words,
