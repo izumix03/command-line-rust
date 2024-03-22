@@ -44,19 +44,21 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_words = 0;
     let mut num_bytes = 0;
     let mut num_chars = 0;
-
-    let reader = BufReader::new(file);
-    for line in reader.lines() {
-        let l = line?;
-        
+    
+    let mut line = String::new();
+    
+    loop {
+        // line に読み込み、読み込みバイト数が返される
+        let line_bytes = file.read_line(&mut line)?;
+        if line_bytes == 0 {
+            break
+        }
+        num_bytes += line_bytes;
         num_lines += 1;
-        
-        let words = l.split(" ");
-        num_words += words.count();
-        
-        
+        num_words += line.split_whitespace().count();
+        num_chars += line.chars().count();
     }
-
+    
     Ok(FileInfo {
         num_lines,
         num_words,
