@@ -1,8 +1,22 @@
 use std::env::Args;
 use std::error::Error;
+use std::fs::File;
+use std::io;
+use std::io::{BufRead, BufReader};
 use clap::{App, Arg};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
+
+pub fn run(config: Config) -> MyResult<()> {
+    for filename in &config.files {
+        match open(filename) {
+            Err(err) => eprintln!("{}: {}", filename, err),
+            Ok(_) => println!("Opened {}", filename)
+        }
+    }
+    println!("{:#?}", config);
+    Ok(())
+}
 
 #[derive(Debug)]
 pub struct Config {
@@ -15,6 +29,27 @@ pub struct Config {
     bytes: bool,
     // 文字数表示有無
     chars: bool,
+}
+
+pub struct FileInfo {
+    num_lines: usize,
+    num_words: usize,
+    num_bytes: usize,
+    num_chars: usize,
+}
+
+pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
+    let mut num_lines = 0;
+    let mut num_words = 0;
+    let mut num_bytes = 0;
+    let mut num_chars = 0;
+    
+    Ok(FileInfo {
+        num_lines,
+        num_words,
+        num_bytes,
+        num_chars,
+    })
 }
 
 pub fn get_args() -> MyResult<Config> {
@@ -59,10 +94,12 @@ pub fn get_args() -> MyResult<Config> {
                 .help("Show word count")
         ).get_matches();
 
-    let mut lines = matches.is_present("lines");
+    let mut lines: bool = matches.is_present("lines");
     let mut words = matches.is_present("words");
     let mut bytes = matches.is_present("bytes");
     let chars = matches.is_present("chars");
+
+    // 何も指定していない場合は下記3つは true
     if [lines, words, bytes, chars].iter().all(|v| v == &false) {
         lines = true;
         words = true;
@@ -77,7 +114,10 @@ pub fn get_args() -> MyResult<Config> {
     })
 }
 
-pub fn run(config: Config) -> MyResult<()> {
-    println!("{:#?}", config);
-    Ok(())
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?)))
+    }
 }
