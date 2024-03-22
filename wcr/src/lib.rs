@@ -1,8 +1,8 @@
-use std::env::Args;
 use std::error::Error;
 use std::fs::File;
 use std::io;
 use std::io::{BufRead, BufReader};
+
 use clap::{App, Arg};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -31,6 +31,7 @@ pub struct Config {
     chars: bool,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct FileInfo {
     num_lines: usize,
     num_words: usize,
@@ -43,7 +44,19 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_words = 0;
     let mut num_bytes = 0;
     let mut num_chars = 0;
-    
+
+    let reader = BufReader::new(file);
+    for line in reader.lines() {
+        let l = line?;
+        
+        num_lines += 1;
+        
+        let words = l.split(" ");
+        num_words += words.count();
+        
+        
+    }
+
     Ok(FileInfo {
         num_lines,
         num_words,
@@ -119,5 +132,26 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
     match filename {
         "-" => Ok(Box::new(BufReader::new(io::stdin()))),
         _ => Ok(Box::new(BufReader::new(File::open(filename)?)))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use super::{count, FileInfo};
+
+    #[test]
+    fn test_count() {
+        let text = "I don't want the world. I just want your half.\r\n";
+        let info = count(Cursor::new(text));
+        assert!(info.is_ok());
+        let expected = FileInfo {
+            num_lines: 1,
+            num_words: 10,
+            num_bytes: 48,
+            num_chars: 48,
+        };
+        assert_eq!(info.unwrap(), expected);
     }
 }
