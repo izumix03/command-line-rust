@@ -19,6 +19,8 @@ pub fn get_args() -> MyResult<Config> {
             Arg::with_name("in_file")
                 .value_name("IN_FILE")
                 .help("Input file")
+                .multiple(false)
+                .required(true)
                 .default_value("-"),
         )
         .arg(
@@ -29,6 +31,7 @@ pub fn get_args() -> MyResult<Config> {
         .arg(
             Arg::with_name("count")
                 .short("c")
+                .long("count")
                 .value_name("COUNT")
                 .help("Show counts")
                 .takes_value(false)
@@ -36,9 +39,9 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     Ok(Config{
-        in_file: "".to_string(),
-        out_file: None,
-        count: false,
+        in_file: matches.value_of_lossy("in_file").unwrap().to_string(),
+        out_file: matches.value_of_lossy("out_file").map(String::from),
+        count: matches.is_present("count"),
     })
 }
 
