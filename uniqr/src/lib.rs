@@ -1,4 +1,7 @@
 use std::error::Error;
+use std::fs::File;
+use std::io;
+use std::io::{BufRead, BufReader};
 use clap::{App, Arg};
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -46,6 +49,25 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:?}", config);
+    let mut file = open(&config.in_file)
+        .map_err(|e| format!("{}: {}", config.in_file, e))?;
+    let mut line = String::new();
+
+    loop {
+        let bytes = file.read_line(&mut line)?;
+        if bytes == 0 {
+            break;
+        }
+        print!("{}", line);
+        line.clear();
+    }
+
     Ok(())
+}
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
 }
